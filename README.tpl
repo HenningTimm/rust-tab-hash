@@ -1,4 +1,4 @@
-# {{crate}} -- Tabulation Hashing for Rust
+# {{crate}} - Tabulation Hashing for Rust
 
 {{readme}}
 
