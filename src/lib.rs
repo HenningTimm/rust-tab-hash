@@ -20,10 +20,10 @@ use rand;
 /// Split up a 32bit number into 8bit chunks
 fn byte_chunks(x: u32) -> [u8; 4] {
     [
-        (x & 0x000000FF) as u8,
-        ((x & 0x0000FF00) >> 8) as u8,
-        ((x & 0x00FF0000) >> 16) as u8,
-        ((x & 0xFF000000) >> 24) as u8,
+        (x & 0x0000_00FF) as u8,
+        ((x & 0x0000_FF00) >> 8) as u8,
+        ((x & 0x00FF_0000) >> 16) as u8,
+        ((x & 0xFF00_0000) >> 24) as u8,
     ]
 }
 
