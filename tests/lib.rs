@@ -1,6 +1,6 @@
 use array_init;
 use rand;
-use rustab::{Tab32Simple, Tab32Twisted};
+use tab_hash::{Tab32Simple, Tab32Twisted};
 
 extern "C" {
     fn SimpleTab32(x: u32, H: &[[u32; 256]; 4]) -> u32;
