@@ -1,11 +1,11 @@
-# tab-hash -- Tabulation Hashing for Rust
+# tab-hash - Tabulation Hashing for Rust
 
 This crate offers rust implementations of simple and twisted tabulation hashing for 32-bit integer values.
 
-## Example
+## Example:
 
 ```rust
-use tab_hash;
+use tab_hash::Tab32Simple;
 
 fn main() {
     let keys = vec![0, 8, 15, 47, 11];
