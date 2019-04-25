@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/HenningTimm/rust-tab-hash.svg?branch=master)](https://travis-ci.org/HenningTimm/rust-tab-hash)
+
 # tab-hash - Tabulation Hashing for Rust
 
 This crate offers rust implementations of simple and twisted tabulation hashing for 32-bit integer values.
