@@ -1,0 +1,17 @@
+[package]
+name = "tab-hash"
+version = "0.1.0"
+authors = ["Henning Timm <henning.timm@tu-dortmund.de>"]
+description = "Simple and twisted tabulation hashing for 32-bit unsigned integers."
+homepage = "https://github.com/HenningTimm/tab-hash"
+build = "build.rs"
+readme = "README.md"
+license-file = "LICENSE.md"
+edition = "2018"
+
+[dependencies]
+rand = "0.6.5"
+array-init = "0.0.4"
+
+[build-dependencies]
+cc = "1.0.35"
