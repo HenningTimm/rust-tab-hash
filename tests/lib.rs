@@ -8,7 +8,7 @@ extern "C" {
 }
 
 #[test]
-fn simple_equal() {
+fn simple_vs_reference_implementation() {
     for _ in 0..100 {
         let simple_tabhash = Tab32Simple::new();
         let seed = simple_tabhash.get_table();
@@ -24,7 +24,7 @@ fn simple_equal() {
 }
 
 #[test]
-fn twisted_equal() {
+fn twisted_vs_reference_implementation() {
     for _ in 0..10 {
         let twisted_tabhash = Tab32Twisted::new();
         let seed = twisted_tabhash.get_table();
@@ -38,4 +38,71 @@ fn twisted_equal() {
             }
         }
     }
+}
+
+
+#[test]
+fn simple_vs_fixed_value() {
+    // chunks           3        2        1        0
+    let key = 0b_00000100_00000010_00000001_00000000;
+    
+    // assemble table for testing
+    let mut byte_1 = [0; 256];
+    let mut byte_2 = [0; 256];
+    let mut byte_3 = [0; 256];
+    let mut byte_4 = [0; 256];
+    byte_1[0] = 7;
+    byte_2[1] = 11;
+    byte_3[2] = 13;
+    byte_4[4] = 17;
+    let table = [byte_1, byte_2, byte_3, byte_4];
+
+    //      111
+    // ^   1011
+    // ^   1101
+    // ^  10001
+    // --------
+    //    10000
+    let result = 16;
+
+    let simple_tabhash = Tab32Simple::with_table(table);
+    assert_eq!(simple_tabhash.hash(key), result);
+}
+
+
+#[test]
+fn twisted_vs_fixed_value() {
+    // chunks           3        2        1        0
+    let key = 0b_00000100_00000010_00000001_00000000;
+    
+    // assemble table for testing
+    let mut byte_1 = [0; 256];
+    let mut byte_2 = [0; 256];
+    let mut byte_3 = [0; 256];
+    let mut byte_4 = [0; 256];
+    byte_1[0] = 7;
+    byte_2[1] = 11;
+    byte_3[2] = 13;
+    byte_4[0b101] = 0x_00_00_00_01_80_00_00_00;
+    let table = [byte_1, byte_2, byte_3, byte_4];
+
+    //        111
+    // ^     1011
+    // ^     1101
+    // ----------
+    // h=    0001
+    // c = chunks[3] ^ h = 0b_0000_0100 ^ 0b_0000_0001 = 0b0000_0101
+    //
+    // 
+    //      00000000_00000000_00000000_00000101
+    // ^  1_10000000_00000000_00000000_00000000
+
+    // ----------------------------------------
+    //    1_10000000_00000000_00000000_00000001
+    // >> 32
+    //                                        1
+    let result = 1;
+
+    let simple_tabhash = Tab32Twisted::with_table(table);
+    assert_eq!(simple_tabhash.hash(key), result);
 }
