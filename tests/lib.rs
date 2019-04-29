@@ -40,12 +40,11 @@ fn twisted_vs_reference_implementation() {
     }
 }
 
-
 #[test]
 fn simple_vs_fixed_value() {
     // chunks           3        2        1        0
     let key = 0b_00000100_00000010_00000001_00000000;
-    
+
     // assemble table for testing
     let mut byte_1 = [0; 256];
     let mut byte_2 = [0; 256];
@@ -69,12 +68,11 @@ fn simple_vs_fixed_value() {
     assert_eq!(simple_tabhash.hash(key), result);
 }
 
-
 #[test]
 fn twisted_vs_fixed_value() {
     // chunks           3        2        1        0
     let key = 0b_00000100_00000010_00000001_00000000;
-    
+
     // assemble table for testing
     let mut byte_1 = [0; 256];
     let mut byte_2 = [0; 256];
@@ -93,7 +91,7 @@ fn twisted_vs_fixed_value() {
     // h=    0001
     // c = chunks[3] ^ h = 0b_0000_0100 ^ 0b_0000_0001 = 0b0000_0101
     //
-    // 
+    //
     //      00000000_00000000_00000000_00000101
     // ^  1_10000000_00000000_00000000_00000000
 

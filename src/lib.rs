@@ -33,8 +33,9 @@
 //!     assert_ne!(twisted_1.hash(key), twisted_3.hash(key));
 //! }
 //! ```
-//! 
+//!
 //! # Literature:
+//! This implementation is based on the articles of Mihai Patrascu and Mikkel Thorup:
 //! - [Simple Tabulation Hashing](http://dx.doi.org/10.1145/1993636.1993638)
 //! - [Twisted Tabulation Hashing](https://doi.org/10.1137/1.9781611973105.16)
 use rand;
@@ -68,7 +69,6 @@ pub struct Tab32Simple {
 }
 
 impl Tab32Simple {
-
     /// Create a new simple tabulation hash function with a random table.
     pub fn new() -> Self {
         Tab32Simple {
@@ -123,7 +123,6 @@ pub struct Tab32Twisted {
 }
 
 impl Tab32Twisted {
-
     /// Create a new twisted tabulation hash function with a random table.
     pub fn new() -> Self {
         Tab32Twisted {
