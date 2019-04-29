@@ -3,12 +3,14 @@ name = "tab-hash"
 version = "0.1.0"
 authors = ["Henning Timm <henning.timm@tu-dortmund.de>"]
 description = "Simple and twisted tabulation hashing for 32-bit unsigned integers."
-homepage = "https://github.com/HenningTimm/tab-hash"
+homepage = "https://github.com/HenningTimm/rust-tab-hash"
+repository = "https://github.com/HenningTimm/rust-tab-hash"
+documentation = "https://docs.rs/tab-hash"
 build = "build.rs"
 readme = "README.md"
 license-file = "LICENSE.md"
 edition = "2018"
-
+keywords = ["hash", "hashing"]
 
 [badges]
 travis-ci = { repository = "HenningTimm/rust-tab-hash" }
