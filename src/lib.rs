@@ -34,6 +34,10 @@
 //! }
 //! ```
 //!
+//! # Note:
+//! These hash functions do not implement the `std::hash::Hasher` trait,
+//! since they do not work on arbitrary length byte streams.
+//!
 //! # Literature:
 //! This implementation is based on the articles of Mihai Patrascu and Mikkel Thorup:
 //! - [Simple Tabulation Hashing](http://dx.doi.org/10.1145/1993636.1993638)
