@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/HenningTimm/rust-tab-hash.svg?branch=master)](https://travis-ci.org/HenningTimm/rust-tab-hash)
 [![creates.io-version](https://img.shields.io/crates/v/tab-hash.svg)](https://crates.io/crates/tab-hash)
-[![creates.io-license](https://img.shields.io/crates/l/tab-hash.svg)](https://crates.io/crates/tab-hash)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![docs.rs](https://docs.rs/tab-hash/badge.svg)](https://docs.rs/tab-hash)
 
 # tab-hash - Tabulation Hashing for Rust
