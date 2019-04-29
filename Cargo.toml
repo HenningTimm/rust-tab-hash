@@ -8,7 +8,7 @@ repository = "https://github.com/HenningTimm/rust-tab-hash"
 documentation = "https://docs.rs/tab-hash"
 build = "build.rs"
 readme = "README.md"
-license-file = "LICENSE.md"
+license = "MIT"
 edition = "2018"
 keywords = ["hash", "hashing"]
 
