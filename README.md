@@ -25,7 +25,7 @@ fn main() {
 }
 ```
 
-To reprocude hashes, save the table used by the hash function and save it.
+To reproduce hashes, save the table used by the hash function.
 The function can be recreated using the `with_table` constructor.
 
 ```rust
