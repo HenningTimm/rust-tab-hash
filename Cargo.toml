@@ -1,8 +1,8 @@
 [package]
 name = "tab-hash"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Henning Timm <henning.timm@tu-dortmund.de>"]
-description = "Simple and twisted tabulation hashing for 32-bit unsigned integers."
+description = "Simple and twisted tabulation hashing for 32-bit and 64-bit unsigned integers."
 homepage = "https://github.com/HenningTimm/rust-tab-hash"
 repository = "https://github.com/HenningTimm/rust-tab-hash"
 documentation = "https://docs.rs/tab-hash"
@@ -16,8 +16,8 @@ keywords = ["hash", "hashing"]
 travis-ci = { repository = "HenningTimm/rust-tab-hash" }
 
 [dependencies]
-rand = "0.6.5"
-array-init = "0.0.4"
+rand = "0.7"
+array-init = "0.1.0"
 
 [build-dependencies]
-cc = "1.0.35"
+cc = "1.0.46"
