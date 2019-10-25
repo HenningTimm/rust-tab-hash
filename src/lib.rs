@@ -45,12 +45,26 @@
 use rand;
 
 /// Split up a 32bit number into 8bit chunks
-fn byte_chunks(x: u32) -> [u8; 4] {
+fn byte_chunks_32(x: u32) -> [u8; 4] {
     [
         (x & 0x0000_00FF) as u8,
         ((x & 0x0000_FF00) >> 8) as u8,
         ((x & 0x00FF_0000) >> 16) as u8,
         ((x & 0xFF00_0000) >> 24) as u8,
+    ]
+}
+
+/// Split up a 64bit number into 8bit chunks
+fn byte_chunks_64(x: u64) -> [u8; 8] {
+    [
+        (x & 0x0000_0000_0000_00FF) as u8,
+        ((x & 0x0000_0000_0000_FF00) >> 8) as u8,
+        ((x & 0x0000_0000_00FF_0000) >> 16) as u8,
+        ((x & 0x0000_0000_FF00_0000) >> 24) as u8,
+        ((x & 0x0000_00FF_0000_0000) >> 32) as u8,
+        ((x & 0x0000_FF00_0000_0000) >> 40) as u8,
+        ((x & 0x00FF_0000_0000_0000) >> 48) as u8,
+        ((x & 0xFF00_0000_0000_0000) >> 56) as u8,
     ]
 }
 
@@ -101,7 +115,7 @@ impl Tab32Simple {
     pub fn hash(&self, x: u32) -> u32 {
         let mut h: u32 = 0; // initialize hash values as 0
 
-        for (i, c) in byte_chunks(x).iter().enumerate() {
+        for (i, c) in byte_chunks_32(x).iter().enumerate() {
             h ^= self.table[i as usize][*c as usize];
         }
         h
@@ -154,7 +168,7 @@ impl Tab32Twisted {
     /// Compute twisted tabulation hash value for a 32bit integer number.
     pub fn hash(&self, x: u32) -> u32 {
         let mut h: u64 = 0; // initialize hash values as 0
-        let chunks = byte_chunks(x);
+        let chunks = byte_chunks_32(x);
         for (i, c) in chunks[0..3].iter().enumerate() {
             h ^= self.table[i as usize][*c as usize];
         }
@@ -166,5 +180,29 @@ impl Tab32Twisted {
         h = h.overflowing_shr(32).0;
 
         h as u32
+    }
+}
+
+#[test]
+fn byte_chunking_32() {
+    let random_bytes: [u8; 400] = array_init::array_init(|_| rand::random());
+    for four_bytes in random_bytes.chunks(4) {
+        let mut number = 0_u32;
+        for byte in four_bytes.iter().rev() {
+            number = (number << 8) | *byte as u32;
+        }
+        assert_eq!(four_bytes, byte_chunks_32(number));
+    }
+}
+
+#[test]
+fn byte_chunking_64() {
+    let random_bytes: [u8; 480] = array_init::array_init(|_| rand::random());
+    for four_bytes in random_bytes.chunks(8) {
+        let mut number = 0_u64;
+        for byte in four_bytes.iter().rev() {
+            number = (number << 8) | *byte as u64;
+        }
+        assert_eq!(four_bytes, byte_chunks_64(number));
     }
 }
