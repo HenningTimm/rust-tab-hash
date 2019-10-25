@@ -1,14 +1,16 @@
 use array_init;
 use rand;
-use tab_hash::{Tab32Simple, Tab32Twisted};
+use tab_hash::{Tab32Simple, Tab32Twisted, Tab64Simple, Tab64Twisted};
 
 extern "C" {
     fn SimpleTab32(x: u32, H: &[[u32; 256]; 4]) -> u32;
     fn TwistedTab32(x: u32, H: &[[u64; 256]; 4]) -> u32;
+    fn SimpleTab64(x: u64, H: &[[u64; 256]; 8]) -> u64;
+    fn TwistedTab64(x: u64, H: &[[u128; 256]; 8]) -> u64;
 }
 
 #[test]
-fn simple_vs_reference_implementation() {
+fn simple32_vs_reference_implementation() {
     for _ in 0..100 {
         let simple_tabhash = Tab32Simple::new();
         let seed = simple_tabhash.get_table();
@@ -24,7 +26,7 @@ fn simple_vs_reference_implementation() {
 }
 
 #[test]
-fn twisted_vs_reference_implementation() {
+fn twisted32_vs_reference_implementation() {
     for _ in 0..10 {
         let twisted_tabhash = Tab32Twisted::new();
         let seed = twisted_tabhash.get_table();
@@ -33,6 +35,39 @@ fn twisted_vs_reference_implementation() {
             let rust_result = twisted_tabhash.hash(*key);
             unsafe {
                 let reference_result = TwistedTab32(*key, &seed);
+                eprintln!("{}", reference_result);
+                assert_eq!(reference_result, rust_result);
+            }
+        }
+    }
+}
+
+#[test]
+fn simple64_vs_reference_implementation() {
+    for _ in 0..100 {
+        let simple_tabhash = Tab64Simple::new();
+        let seed = simple_tabhash.get_table();
+        let random_keys: [u64; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            let rust_result = simple_tabhash.hash(*key);
+            unsafe {
+                let reference_result = SimpleTab64(*key, &seed);
+                assert_eq!(reference_result, rust_result);
+            }
+        }
+    }
+}
+
+#[test]
+fn twisted64_vs_reference_implementation() {
+    for _ in 0..10 {
+        let twisted_tabhash = Tab64Twisted::new();
+        let seed = twisted_tabhash.get_table();
+        let random_keys: [u64; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            let rust_result = twisted_tabhash.hash(*key);
+            unsafe {
+                let reference_result = TwistedTab64(*key, &seed);
                 eprintln!("{}", reference_result);
                 assert_eq!(reference_result, rust_result);
             }

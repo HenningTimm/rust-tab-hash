@@ -122,6 +122,60 @@ impl Tab32Simple {
     }
 }
 
+/// A universal hash function for 64-bit integers using simple tabulation.
+///
+/// Usage:
+/// ```rust
+/// use tab_hash::Tab64Simple;
+///
+/// fn main() {
+///     let keys = vec![0, 8, 15, 47, 11];
+///     let simple = Tab64Simple::new();
+///     for k in keys {
+///         println!("{}", simple.hash(k));
+///     }
+/// }
+/// ```
+pub struct Tab64Simple {
+    table: [[u64; 256]; 8],
+}
+
+impl Tab64Simple {
+    /// Create a new simple tabulation hash function with a random table.
+    pub fn new() -> Self {
+        Tab64Simple {
+            table: Tab64Simple::initialize_table(),
+        }
+    }
+
+    /// Create a new simple tabulation hash function with a given table.
+    pub fn with_table(table: [[u64; 256]; 8]) -> Self {
+        Tab64Simple { table }
+    }
+
+    /// Generate a table of 64bit uints for simple tabulation hashing
+    fn initialize_table() -> [[u64; 256]; 8] {
+        let table: [[u64; 256]; 8] =
+            array_init::array_init(|_| array_init::array_init(|_| rand::random()));
+        table
+    }
+
+    /// Get the table used by this hash function.
+    pub fn get_table(&self) -> [[u64; 256]; 8] {
+        self.table
+    }
+
+    /// Compute simple tabulation hash value for a 64bit integer number.
+    pub fn hash(&self, x: u64) -> u64 {
+        let mut h: u64 = 0; // initialize hash values as 0
+
+        for (i, c) in byte_chunks_64(x).iter().enumerate() {
+            h ^= self.table[i as usize][*c as usize];
+        }
+        h
+    }
+}
+
 /// A universal hash function for 32-bit integers using twisted tabulation.
 ///
 /// Usage:
@@ -180,6 +234,67 @@ impl Tab32Twisted {
         h = h.overflowing_shr(32).0;
 
         h as u32
+    }
+}
+
+/// A universal hash function for 64-bit integers using twisted tabulation.
+///
+/// Usage:
+/// ```rust
+/// use tab_hash::Tab64Twisted;
+///
+/// fn main() {
+///     let keys = vec![0, 8, 15, 47, 11];
+///     let twisted = Tab64Twisted::new();
+///     for k in keys {
+///         println!("{}", twisted.hash(k));
+///     }
+/// }
+/// ```
+pub struct Tab64Twisted {
+    table: [[u128; 256]; 8],
+}
+
+impl Tab64Twisted {
+    /// Create a new twisted tabulation hash function with a random table.
+    pub fn new() -> Self {
+        Tab64Twisted {
+            table: Tab64Twisted::initialize_table(),
+        }
+    }
+
+    /// Create a new twisted tabulation hash function with a given table.
+    pub fn with_table(table: [[u128; 256]; 8]) -> Self {
+        Tab64Twisted { table }
+    }
+
+    /// Generate a table of 128bit uints for twisted tabulation hashing
+    fn initialize_table() -> [[u128; 256]; 8] {
+        let table: [[u128; 256]; 8] =
+            array_init::array_init(|_| array_init::array_init(|_| rand::random()));
+        table
+    }
+
+    /// Get the table used by this hash function.
+    pub fn get_table(&self) -> [[u128; 256]; 8] {
+        self.table
+    }
+
+    /// Compute twisted tabulation hash value for a 64bit integer number.
+    pub fn hash(&self, x: u64) -> u64 {
+        let mut h: u128 = 0; // initialize hash values as 0
+        let chunks = byte_chunks_64(x);
+        for (i, c) in chunks[0..7].iter().enumerate() {
+            h ^= self.table[i as usize][*c as usize];
+        }
+        // compute address for last chunk by XOring the lowest byte of the
+        // current hash value with the content of the last chunk of the key
+        let c = chunks[7] ^ (h & 0xFF) as u8;
+        h ^= self.table[7][c as usize];
+        // shift out the 64 low bits of the resulting hash
+        h = h.overflowing_shr(64).0;
+
+        h as u64
     }
 }
 
