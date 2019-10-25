@@ -82,6 +82,7 @@ fn byte_chunks_64(x: u64) -> [u8; 8] {
 ///     }
 /// }
 /// ```
+#[derive(Clone)]
 pub struct Tab32Simple {
     table: [[u32; 256]; 4],
 }
@@ -136,6 +137,7 @@ impl Tab32Simple {
 ///     }
 /// }
 /// ```
+#[derive(Clone)]
 pub struct Tab64Simple {
     table: [[u64; 256]; 8],
 }
@@ -190,6 +192,7 @@ impl Tab64Simple {
 ///     }
 /// }
 /// ```
+#[derive(Clone)]
 pub struct Tab32Twisted {
     table: [[u64; 256]; 4],
 }
@@ -251,6 +254,7 @@ impl Tab32Twisted {
 ///     }
 /// }
 /// ```
+#[derive(Clone)]
 pub struct Tab64Twisted {
     table: [[u128; 256]; 8],
 }
