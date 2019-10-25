@@ -2,6 +2,7 @@
  * It is used as reference implementation for tests.
  */
 #include <stdint.h> //defines uintX_t as unsigned X-bit integer.
+typedef unsigned __int128 uint128_t;
 
 uint32_t SimpleTab32(uint32_t x, uint32_t H[4][256]) {
   uint32_t i;
@@ -51,9 +52,9 @@ uint64_t SimpleTab64(uint64_t x, uint64_t H[8][256]) {
 }
 
 /* 64-bit version */
-uint64_t TwistedTab64(uint64_t x, __uint128_t H[8][256]) {
+uint64_t TwistedTab64(uint64_t x, uint128_t H[8][256]) {
   uint64_t i;
-  __uint128_t h = 0;
+  uint128_t h = 0;
   uint8_t c;
   for (i=0; i<7; i++) {
     c = x;
