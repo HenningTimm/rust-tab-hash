@@ -43,6 +43,8 @@
 //! - [Simple Tabulation Hashing](http://dx.doi.org/10.1145/1993636.1993638)
 //! - [Twisted Tabulation Hashing](https://doi.org/10.1137/1.9781611973105.16)
 use rand;
+use serde;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 /// Split up a 32bit number into 8bit chunks
 fn byte_chunks_32(x: u32) -> [u8; 4] {
@@ -82,8 +84,9 @@ fn byte_chunks_64(x: u64) -> [u8; 8] {
 ///     }
 /// }
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
 pub struct Tab32Simple {
+    #[serde(deserialize_with = "tab32simple_from_vec")]
     table: [[u32; 256]; 4],
 }
 
@@ -93,6 +96,28 @@ impl Tab32Simple {
         Tab32Simple {
             table: Tab32Simple::initialize_table(),
         }
+    }
+
+    /// Create a new simple tabulation hash function with a random table.
+    pub fn to_vec(&self) -> Vec<Vec<u32>> {
+        let mut vec = Vec::with_capacity(4);
+        for col in self.table.iter() {
+            vec.push(col.to_vec());
+        }
+        vec
+    }
+
+    /// Create a new simple tabulation hash function with a random table.
+    pub fn from_vec(table_data: Vec<Vec<u32>>) -> Self {
+        let mut table = [[0_u32; 256]; 4];
+        assert_eq!(table_data.len(), 4);
+        for (i, column) in table_data.iter().enumerate() {
+            assert_eq!(column.len(), 256);
+            for (j, value) in column.iter().enumerate() {
+                table[i][j] = *value;
+            }
+        }
+        Tab32Simple { table }
     }
 
     /// Create a new simple tabulation hash function with a given table.
@@ -123,6 +148,41 @@ impl Tab32Simple {
     }
 }
 
+/// Custom serialization converting nested array to a nested vec (cannot be derived)
+fn tab32simple_from_vec<'de, D>(deserializer: D) -> Result<[[u32; 256]; 4], D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let table_data: Vec<Vec<u32>> = Deserialize::deserialize(deserializer)?;
+
+    let mut table = [[0_u32; 256]; 4];
+    assert_eq!(table_data.len(), 4);
+    for (i, column) in table_data.iter().enumerate() {
+        assert_eq!(column.len(), 256);
+        for (j, value) in column.iter().enumerate() {
+            table[i][j] = *value;
+        }
+    }
+    Ok(table)
+}
+
+#[derive(Clone, Serialize)]
+struct _VecTab32Simple {
+    table: Vec<Vec<u32>>,
+}
+
+impl Serialize for Tab32Simple {
+    fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        _VecTab32Simple {
+            table: self.to_vec(),
+        }
+        .serialize(s)
+    }
+}
+
 /// A universal hash function for 64-bit integers using simple tabulation.
 ///
 /// Usage:
@@ -137,8 +197,9 @@ impl Tab32Simple {
 ///     }
 /// }
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
 pub struct Tab64Simple {
+    #[serde(deserialize_with = "tab64simple_from_vec")]
     table: [[u64; 256]; 8],
 }
 
@@ -148,6 +209,28 @@ impl Tab64Simple {
         Tab64Simple {
             table: Tab64Simple::initialize_table(),
         }
+    }
+
+    /// Create a new simple tabulation hash function with a random table.
+    pub fn to_vec(&self) -> Vec<Vec<u64>> {
+        let mut vec = Vec::with_capacity(8);
+        for col in self.table.iter() {
+            vec.push(col.to_vec());
+        }
+        vec
+    }
+
+    /// Create a new simple tabulation hash function with a random table.
+    pub fn from_vec(table_data: Vec<Vec<u64>>) -> Self {
+        let mut table = [[0_u64; 256]; 8];
+        assert_eq!(table_data.len(), 8);
+        for (i, column) in table_data.iter().enumerate() {
+            assert_eq!(column.len(), 256);
+            for (j, value) in column.iter().enumerate() {
+                table[i][j] = *value;
+            }
+        }
+        Tab64Simple { table }
     }
 
     /// Create a new simple tabulation hash function with a given table.
@@ -178,6 +261,41 @@ impl Tab64Simple {
     }
 }
 
+/// Custom serialization converting nested array to a nested vec (cannot be derived)
+fn tab64simple_from_vec<'de, D>(deserializer: D) -> Result<[[u64; 256]; 8], D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let table_data: Vec<Vec<u64>> = Deserialize::deserialize(deserializer)?;
+
+    let mut table = [[0_u64; 256]; 8];
+    assert_eq!(table_data.len(), 8);
+    for (i, column) in table_data.iter().enumerate() {
+        assert_eq!(column.len(), 256);
+        for (j, value) in column.iter().enumerate() {
+            table[i][j] = *value;
+        }
+    }
+    Ok(table)
+}
+
+#[derive(Clone, Serialize)]
+struct _VecTab64Simple {
+    table: Vec<Vec<u64>>,
+}
+
+impl Serialize for Tab64Simple {
+    fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        _VecTab64Simple {
+            table: self.to_vec(),
+        }
+        .serialize(s)
+    }
+}
+
 /// A universal hash function for 32-bit integers using twisted tabulation.
 ///
 /// Usage:
@@ -192,8 +310,9 @@ impl Tab64Simple {
 ///     }
 /// }
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
 pub struct Tab32Twisted {
+    #[serde(deserialize_with = "tab32twisted_from_vec")]
     table: [[u64; 256]; 4],
 }
 
@@ -203,6 +322,28 @@ impl Tab32Twisted {
         Tab32Twisted {
             table: Tab32Twisted::initialize_table(),
         }
+    }
+
+    /// Create a new simple tabulation hash function with a random table.
+    pub fn to_vec(&self) -> Vec<Vec<u64>> {
+        let mut vec = Vec::with_capacity(4);
+        for col in self.table.iter() {
+            vec.push(col.to_vec());
+        }
+        vec
+    }
+
+    /// Create a new simple tabulation hash function with a random table.
+    pub fn from_vec(table_data: Vec<Vec<u64>>) -> Self {
+        let mut table = [[0_u64; 256]; 4];
+        assert_eq!(table_data.len(), 4);
+        for (i, column) in table_data.iter().enumerate() {
+            assert_eq!(column.len(), 256);
+            for (j, value) in column.iter().enumerate() {
+                table[i][j] = *value;
+            }
+        }
+        Tab32Twisted { table }
     }
 
     /// Create a new twisted tabulation hash function with a given table.
@@ -240,6 +381,41 @@ impl Tab32Twisted {
     }
 }
 
+/// Custom serialization converting nested array to a nested vec (cannot be derived)
+fn tab32twisted_from_vec<'de, D>(deserializer: D) -> Result<[[u64; 256]; 4], D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let table_data: Vec<Vec<u64>> = Deserialize::deserialize(deserializer)?;
+
+    let mut table = [[0_u64; 256]; 4];
+    assert_eq!(table_data.len(), 4);
+    for (i, column) in table_data.iter().enumerate() {
+        assert_eq!(column.len(), 256);
+        for (j, value) in column.iter().enumerate() {
+            table[i][j] = *value;
+        }
+    }
+    Ok(table)
+}
+
+#[derive(Clone, Serialize)]
+struct _VecTab32Twisted {
+    table: Vec<Vec<u64>>,
+}
+
+impl Serialize for Tab32Twisted {
+    fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        _VecTab32Twisted {
+            table: self.to_vec(),
+        }
+        .serialize(s)
+    }
+}
+
 /// A universal hash function for 64-bit integers using twisted tabulation.
 ///
 /// Usage:
@@ -254,8 +430,9 @@ impl Tab32Twisted {
 ///     }
 /// }
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
 pub struct Tab64Twisted {
+    #[serde(deserialize_with = "tab64twisted_from_vec")]
     table: [[u128; 256]; 8],
 }
 
@@ -265,6 +442,28 @@ impl Tab64Twisted {
         Tab64Twisted {
             table: Tab64Twisted::initialize_table(),
         }
+    }
+
+    /// Create a new simple tabulation hash function with a random table.
+    pub fn to_vec(&self) -> Vec<Vec<u128>> {
+        let mut vec = Vec::with_capacity(8);
+        for col in self.table.iter() {
+            vec.push(col.to_vec());
+        }
+        vec
+    }
+
+    /// Create a new simple tabulation hash function with a random table.
+    pub fn from_vec(table_data: Vec<Vec<u128>>) -> Self {
+        let mut table = [[0_u128; 256]; 8];
+        assert_eq!(table_data.len(), 8);
+        for (i, column) in table_data.iter().enumerate() {
+            assert_eq!(column.len(), 256);
+            for (j, value) in column.iter().enumerate() {
+                table[i][j] = *value;
+            }
+        }
+        Tab64Twisted { table }
     }
 
     /// Create a new twisted tabulation hash function with a given table.
@@ -302,6 +501,42 @@ impl Tab64Twisted {
     }
 }
 
+/// Custom serialization converting nested array to a nested vec (cannot be derived)
+fn tab64twisted_from_vec<'de, D>(deserializer: D) -> Result<[[u128; 256]; 8], D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let table_data: Vec<Vec<u128>> = Deserialize::deserialize(deserializer)?;
+
+    let mut table = [[0_u128; 256]; 8];
+    assert_eq!(table_data.len(), 8);
+    for (i, column) in table_data.iter().enumerate() {
+        assert_eq!(column.len(), 256);
+        for (j, value) in column.iter().enumerate() {
+            table[i][j] = *value;
+        }
+    }
+    Ok(table)
+}
+
+#[derive(Clone, Serialize)]
+struct _VecTab64Twisted {
+    table: Vec<Vec<u128>>,
+}
+
+impl Serialize for Tab64Twisted {
+    fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        _VecTab64Twisted {
+            table: self.to_vec(),
+        }
+        .serialize(s)
+    }
+}
+
+// Tests for private methods
 #[test]
 fn byte_chunking_32() {
     let random_bytes: [u8; 400] = array_init::array_init(|_| rand::random());

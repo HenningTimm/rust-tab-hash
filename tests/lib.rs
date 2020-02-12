@@ -139,3 +139,163 @@ fn twisted_vs_fixed_value() {
     let simple_tabhash = Tab32Twisted::with_table(table);
     assert_eq!(simple_tabhash.hash(key), result);
 }
+
+#[test]
+fn simple32_to_and_from_vec() {
+    for _ in 0..1000 {
+        let h = Tab32Simple::new();
+        let table = h.to_vec();
+        let h2 = Tab32Simple::from_vec(table);
+
+        let t1 = h.get_table();
+        let t2 = h2.get_table();
+        for column in 0..4 {
+            assert_eq!(t1[column].to_vec(), t2[column].to_vec());
+        }
+
+        let random_keys: [u32; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            assert_eq!(h.hash(*key), h2.hash(*key));
+        }
+    }
+}
+
+#[test]
+fn twisted32_to_and_from_vec() {
+    for _ in 0..1000 {
+        let h = Tab32Twisted::new();
+        let table = h.to_vec();
+        let h2 = Tab32Twisted::from_vec(table);
+
+        let t1 = h.get_table();
+        let t2 = h2.get_table();
+        for column in 0..4 {
+            assert_eq!(t1[column].to_vec(), t2[column].to_vec());
+        }
+
+        let random_keys: [u32; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            assert_eq!(h.hash(*key), h2.hash(*key));
+        }
+    }
+}
+
+#[test]
+fn simple64_to_and_from_vec() {
+    for _ in 0..1000 {
+        let h = Tab64Simple::new();
+        let table = h.to_vec();
+        let h2 = Tab64Simple::from_vec(table);
+
+        let t1 = h.get_table();
+        let t2 = h2.get_table();
+        for column in 0..4 {
+            assert_eq!(t1[column].to_vec(), t2[column].to_vec());
+        }
+
+        let random_keys: [u64; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            assert_eq!(h.hash(*key), h2.hash(*key));
+        }
+    }
+}
+
+#[test]
+fn twisted64_to_and_from_vec() {
+    for _ in 0..1000 {
+        let h = Tab64Twisted::new();
+        let table = h.to_vec();
+        let h2 = Tab64Twisted::from_vec(table);
+
+        let t1 = h.get_table();
+        let t2 = h2.get_table();
+        for column in 0..4 {
+            assert_eq!(t1[column].to_vec(), t2[column].to_vec());
+        }
+
+        let random_keys: [u64; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            assert_eq!(h.hash(*key), h2.hash(*key));
+        }
+    }
+}
+
+#[test]
+fn simple32_serialization() {
+    for _ in 0..1000 {
+        let hf = Tab32Simple::new();
+        let serialized_hf = bincode::serialize(&hf).unwrap();
+        let deserialized_hf: Tab32Simple = bincode::deserialize(&serialized_hf).unwrap();
+
+        let t1 = hf.get_table();
+        let t2 = deserialized_hf.get_table();
+        for column in 0..4 {
+            assert_eq!(t1[column].to_vec(), t2[column].to_vec());
+        }
+
+        let random_keys: [u32; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            assert_eq!(hf.hash(*key), deserialized_hf.hash(*key));
+        }
+    }
+}
+
+#[test]
+fn simple64_serialization() {
+    for _ in 0..1000 {
+        let hf = Tab64Simple::new();
+        let serialized_hf = bincode::serialize(&hf).unwrap();
+        let deserialized_hf: Tab64Simple = bincode::deserialize(&serialized_hf).unwrap();
+
+        let t1 = hf.get_table();
+        let t2 = deserialized_hf.get_table();
+        for column in 0..4 {
+            assert_eq!(t1[column].to_vec(), t2[column].to_vec());
+        }
+
+        let random_keys: [u64; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            assert_eq!(hf.hash(*key), deserialized_hf.hash(*key));
+        }
+    }
+}
+
+#[test]
+fn twisted32_serialization() {
+    for _ in 0..1000 {
+        let hf = Tab32Twisted::new();
+        let serialized_hf = bincode::serialize(&hf).unwrap();
+        let deserialized_hf: Tab32Twisted = bincode::deserialize(&serialized_hf).unwrap();
+
+        let t1 = hf.get_table();
+        let t2 = deserialized_hf.get_table();
+        for column in 0..4 {
+            assert_eq!(t1[column].to_vec(), t2[column].to_vec());
+        }
+
+        let random_keys: [u32; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            assert_eq!(hf.hash(*key), deserialized_hf.hash(*key));
+        }
+    }
+}
+
+#[test]
+fn twisted64_serialization() {
+    for _ in 0..1000 {
+        let hf = Tab64Twisted::new();
+        let serialized_hf = bincode::serialize(&hf).unwrap();
+        let deserialized_hf: Tab64Twisted = bincode::deserialize(&serialized_hf).unwrap();
+
+        let t1 = hf.get_table();
+        let t2 = deserialized_hf.get_table();
+        for column in 0..4 {
+            assert_eq!(t1[column].to_vec(), t2[column].to_vec());
+        }
+
+        let random_keys: [u64; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            assert_eq!(hf.hash(*key), deserialized_hf.hash(*key));
+        }
+    }
+}

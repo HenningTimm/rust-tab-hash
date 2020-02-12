@@ -51,3 +51,10 @@ The 64-bit version of twisted tabulation hashing (`Tab64Twisted`) requires 128-b
 This implementation is based on the articles of Mihai Pătraşcu and Mikkel Thorup:
 - [Simple Tabulation Hashing](http://dx.doi.org/10.1145/1993636.1993638)
 - [Twisted Tabulation Hashing](https://doi.org/10.1137/1.9781611973105.16)
+
+
+## Changelog
+
+### Version 0.3.0 [2020-02-12]
+
+Made all classes serializable and deserializable.
