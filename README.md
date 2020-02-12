@@ -57,4 +57,4 @@ This implementation is based on the articles of Mihai Pătraşcu and Mikkel Thor
 
 ### Version 0.3.0 [2020-02-12]
 
-Made all classes serializable and deserializable.
+Made all structs serializable and deserializable.
