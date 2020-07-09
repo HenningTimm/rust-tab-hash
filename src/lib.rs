@@ -38,8 +38,6 @@
 //! This implementation is based on the articles of Mihai Patrascu and Mikkel Thorup:
 //! - [Simple Tabulation Hashing](http://dx.doi.org/10.1145/1993636.1993638)
 //! - [Twisted Tabulation Hashing](https://doi.org/10.1137/1.9781611973105.16)
-use rand;
-use serde;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 /// Split up a 32bit number into 8bit chunks
