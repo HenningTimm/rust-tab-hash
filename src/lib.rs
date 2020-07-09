@@ -9,12 +9,10 @@
 //! ```rust
 //! use tab_hash::Tab32Simple;
 //!
-//! fn main() {
-//!     let keys = vec![0, 8, 15, 47, 11];
-//!     let simple = Tab32Simple::new();
-//!     for k in keys {
-//!         println!("{}", simple.hash(k));
-//!     }
+//! let keys = vec![0, 8, 15, 47, 11];
+//! let simple = Tab32Simple::new();
+//! for k in keys {
+//!     println!("{}", simple.hash(k));
 //! }
 //! ```
 //!
@@ -24,14 +22,12 @@
 //! ```rust
 //! use tab_hash::Tab32Twisted;
 //!
-//! fn main() {
-//!     let key = 42;
-//!     let twisted_1 = Tab32Twisted::new();
-//!     let twisted_2 = Tab32Twisted::with_table(twisted_1.get_table());
-//!     let twisted_3 = Tab32Twisted::new();
-//!     assert_eq!(twisted_1.hash(key), twisted_2.hash(key));
-//!     assert_ne!(twisted_1.hash(key), twisted_3.hash(key));
-//! }
+//! let key = 42;
+//! let twisted_1 = Tab32Twisted::new();
+//! let twisted_2 = Tab32Twisted::with_table(twisted_1.get_table());
+//! let twisted_3 = Tab32Twisted::new();
+//! assert_eq!(twisted_1.hash(key), twisted_2.hash(key));
+//! assert_ne!(twisted_1.hash(key), twisted_3.hash(key));
 //! ```
 //!
 //! # Note:
@@ -76,12 +72,10 @@ fn byte_chunks_64(x: u64) -> [u8; 8] {
 /// ```rust
 /// use tab_hash::Tab32Simple;
 ///
-/// fn main() {
-///     let keys = vec![0, 8, 15, 47, 11];
-///     let simple = Tab32Simple::new();
-///     for k in keys {
-///         println!("{}", simple.hash(k));
-///     }
+/// let keys = vec![0, 8, 15, 47, 11];
+/// let simple = Tab32Simple::new();
+/// for k in keys {
+///     println!("{}", simple.hash(k));
 /// }
 /// ```
 #[derive(Clone, Deserialize)]
@@ -189,12 +183,10 @@ impl Serialize for Tab32Simple {
 /// ```rust
 /// use tab_hash::Tab64Simple;
 ///
-/// fn main() {
-///     let keys = vec![0, 8, 15, 47, 11];
-///     let simple = Tab64Simple::new();
-///     for k in keys {
-///         println!("{}", simple.hash(k));
-///     }
+/// let keys = vec![0, 8, 15, 47, 11];
+/// let simple = Tab64Simple::new();
+/// for k in keys {
+///     println!("{}", simple.hash(k));
 /// }
 /// ```
 #[derive(Clone, Deserialize)]
@@ -302,12 +294,10 @@ impl Serialize for Tab64Simple {
 /// ```rust
 /// use tab_hash::Tab32Twisted;
 ///
-/// fn main() {
-///     let keys = vec![0, 8, 15, 47, 11];
-///     let twisted = Tab32Twisted::new();
-///     for k in keys {
-///         println!("{}", twisted.hash(k));
-///     }
+/// let keys = vec![0, 8, 15, 47, 11];
+/// let twisted = Tab32Twisted::new();
+/// for k in keys {
+///     println!("{}", twisted.hash(k));
 /// }
 /// ```
 #[derive(Clone, Deserialize)]
@@ -422,12 +412,10 @@ impl Serialize for Tab32Twisted {
 /// ```rust
 /// use tab_hash::Tab64Twisted;
 ///
-/// fn main() {
-///     let keys = vec![0, 8, 15, 47, 11];
-///     let twisted = Tab64Twisted::new();
-///     for k in keys {
-///         println!("{}", twisted.hash(k));
-///     }
+/// let keys = vec![0, 8, 15, 47, 11];
+/// let twisted = Tab64Twisted::new();
+/// for k in keys {
+///     println!("{}", twisted.hash(k));
 /// }
 /// ```
 #[derive(Clone, Deserialize)]
