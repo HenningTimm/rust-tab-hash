@@ -2,6 +2,7 @@
 [![creates.io-version](https://img.shields.io/crates/v/tab-hash.svg)](https://crates.io/crates/tab-hash)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![docs.rs](https://docs.rs/tab-hash/badge.svg)](https://docs.rs/tab-hash)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3936766.svg)](https://doi.org/10.5281/zenodo.3936766)
 
 # tab-hash - Tabulation Hashing for Rust
 
