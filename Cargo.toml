@@ -1,15 +1,15 @@
 [package]
 name = "tab-hash"
-version = "0.3.0"
-authors = ["Henning Timm <henning.timm@tu-dortmund.de>"]
-description = "Simple and twisted tabulation hashing for 32-bit and 64-bit unsigned integers."
+version = "0.3.1"
+authors = ["Henning Timm <henning.timm@tu-dortmund.de>", "Jianshu Zhao <jianshuzhao@yahoo.com>"]
+description = "Simple, twisted, and mixed tabulation hashing for 32-bit and 64-bit unsigned integers."
 homepage = "https://github.com/HenningTimm/rust-tab-hash"
 repository = "https://github.com/HenningTimm/rust-tab-hash"
 documentation = "https://docs.rs/tab-hash"
 build = "build.rs"
 readme = "README.md"
 license = "MIT"
-edition = "2018"
+edition = "2024"
 keywords = ["hash", "hashing"]
 
 [badges]

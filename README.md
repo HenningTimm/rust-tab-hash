@@ -6,11 +6,11 @@
 
 # tab-hash - Tabulation Hashing for Rust
 
-This crate offers rust implementations of simple and twisted tabulation hashing for 32-bit und 64-bit integer values.
+This crate offers Rust implementations of simple, twisted, and mixed tabulation hashing for 32-bit and 64-bit integer values.
 
-Instatiating `Tab32Simple` or `Tab32Twisted` (or their 64-bit counterparts) will initialize a table and
+Instantiating `Tab32Simple`, `Tab32Twisted`, or `Tab32Mixed` (or their 64-bit counterparts) will initialize tables and
 create a random hash function from the respective hash family.
-The hash values of an integer key is computed by calling its `hash` method.
+The hash value of an integer key is computed by calling its `hash` method.
 
 ## Example:
 
@@ -48,10 +48,14 @@ since they do not work on arbitrary length byte streams.
 
 The 64-bit version of twisted tabulation hashing (`Tab64Twisted`) requires 128-bit operations (see [here](https://doi.org/10.1137/1.9781611973105.16)).
 
+Mixed tabulation uses four 8-bit derived characters. `Tab32Mixed` performs 4 + 4 table lookups, while `Tab64Mixed` performs 8 + 4 table lookups.
+
 ## Literature:
 This implementation is based on the articles of Mihai Pătraşcu and Mikkel Thorup:
 - [Simple Tabulation Hashing](http://dx.doi.org/10.1145/1993636.1993638)
 - [Twisted Tabulation Hashing](https://doi.org/10.1137/1.9781611973105.16)
+- [Hashing for Statistics over k-Partitions](https://doi.org/10.1109/FOCS.2015.83)
+- [Fast and Powerful Hashing Using Tabulation](https://arxiv.org/abs/1505.01523)
 
 
 ## Changelog
