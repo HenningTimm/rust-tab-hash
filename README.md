@@ -12,7 +12,7 @@ Instantiating `Tab32Simple`, `Tab32Twisted`, or `Tab32Mixed` (or their 64-bit co
 create a random hash function from the respective hash family.
 The hash value of an integer key is computed by calling its `hash` method.
 
-## Example:
+## Simple tabulation example
 
 ```rust
 use tab_hash::Tab32Simple;
@@ -23,6 +23,23 @@ fn main() {
     for k in keys {
         println!("{}", simple.hash(k));
     }
+}
+```
+
+## Mixed tabulation example
+
+`Tab32Mixed` and `Tab64Mixed` use the same `new` and `hash` interface as the
+simple and twisted variants:
+
+```rust
+use tab_hash::{Tab32Mixed, Tab64Mixed};
+
+fn main() {
+    let mixed32 = Tab32Mixed::new();
+    let mixed64 = Tab64Mixed::new();
+
+    println!("32-bit hash: {}", mixed32.hash(42_u32));
+    println!("64-bit hash: {}", mixed64.hash(42_u64));
 }
 ```
 
@@ -39,6 +56,22 @@ fn main() {
     let twisted_3 = Tab64Twisted::new();
     assert_eq!(twisted_1.hash(key), twisted_2.hash(key));
     assert_ne!(twisted_1.hash(key), twisted_3.hash(key));
+}
+```
+
+Mixed tabulation has two tables. Pass both values returned by `get_table` to
+`with_table` to recreate the same hash function:
+
+```rust
+use tab_hash::Tab64Mixed;
+
+fn main() {
+    let key = 42;
+    let mixed_1 = Tab64Mixed::new();
+    let (first_table, second_table) = mixed_1.get_table();
+    let mixed_2 = Tab64Mixed::with_table(first_table, second_table);
+
+    assert_eq!(mixed_1.hash(key), mixed_2.hash(key));
 }
 ```
 
@@ -59,6 +92,10 @@ This implementation is based on the articles of Mihai Pătraşcu and Mikkel Thor
 
 
 ## Changelog
+
+### Version 0.3.1 [2026-06-23]
+
+Add mixed tabulation hashing.
 
 ### Version 0.3.0 [2020-02-12]
 
