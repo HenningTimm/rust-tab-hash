@@ -294,6 +294,8 @@ impl Serialize for Tab64Simple {
 /// Mixed tabulation first hashes the four input bytes into a 32-bit intermediate
 /// hash value and four derived bytes. The derived bytes are then hashed by a
 /// second simple tabulation function and XORed into the intermediate value.
+/// This implementation uses `c = d = 4`, where `c` is the number of input
+/// characters and `d` is the number of derived characters.
 ///
 /// Usage:
 /// ```rust
@@ -447,7 +449,9 @@ impl Serialize for Tab32Mixed {
 /// A hash function for 64-bit integers using mixed tabulation.
 /// see paper:Dahlgaard, S., Knudsen, M. and Thorup, M., 2017. Practical hash functions for similarity estimation and dimensionality reduction. Advances in neural information processing systems, 30.
 /// The first stage uses eight input-byte lookups to produce a 64-bit intermediate
-/// hash value and four derived bytes. Four more lookups hash the derived bytes.
+/// hash value and eight derived bytes. Eight more lookups hash the derived bytes.
+/// This implementation uses `c = d = 8`, where `c` is the number of input
+/// characters and `d` is the number of derived characters.
 ///
 /// Usage:
 /// ```rust
@@ -464,7 +468,7 @@ pub struct Tab64Mixed {
     #[serde(deserialize_with = "tab64mixed_first_from_vec")]
     first_table: [[u128; 256]; 8],
     #[serde(deserialize_with = "tab64mixed_second_from_vec")]
-    second_table: [[u64; 256]; 4],
+    second_table: [[u64; 256]; 8],
 }
 
 impl Tab64Mixed {
@@ -502,8 +506,8 @@ impl Tab64Mixed {
             }
         }
 
-        let mut second_table = [[0_u64; 256]; 4];
-        assert_eq!(second_table_data.len(), 4);
+        let mut second_table = [[0_u64; 256]; 8];
+        assert_eq!(second_table_data.len(), 8);
         for (i, column) in second_table_data.iter().enumerate() {
             assert_eq!(column.len(), 256);
             for (j, value) in column.iter().enumerate() {
@@ -518,7 +522,7 @@ impl Tab64Mixed {
     }
 
     /// Create a mixed tabulation hash function with the given tables.
-    pub fn with_table(first_table: [[u128; 256]; 8], second_table: [[u64; 256]; 4]) -> Self {
+    pub fn with_table(first_table: [[u128; 256]; 8], second_table: [[u64; 256]; 8]) -> Self {
         Tab64Mixed {
             first_table,
             second_table,
@@ -526,7 +530,7 @@ impl Tab64Mixed {
     }
 
     /// Get the tables used by this hash function.
-    pub fn get_table(&self) -> ([[u128; 256]; 8], [[u64; 256]; 4]) {
+    pub fn get_table(&self) -> ([[u128; 256]; 8], [[u64; 256]; 8]) {
         (self.first_table, self.second_table)
     }
 
@@ -537,7 +541,7 @@ impl Tab64Mixed {
             first_hash ^= self.first_table[i][*c as usize];
         }
 
-        let derived = byte_chunks_32((first_hash >> 64) as u32);
+        let derived = byte_chunks_64((first_hash >> 64) as u64);
         let mut hash = first_hash as u64;
         for (i, c) in derived.iter().enumerate() {
             hash ^= self.second_table[i][*c as usize];
@@ -562,13 +566,13 @@ where
     Ok(table)
 }
 
-fn tab64mixed_second_from_vec<'de, D>(deserializer: D) -> Result<[[u64; 256]; 4], D::Error>
+fn tab64mixed_second_from_vec<'de, D>(deserializer: D) -> Result<[[u64; 256]; 8], D::Error>
 where
     D: Deserializer<'de>,
 {
     let table_data: Vec<Vec<u64>> = Deserialize::deserialize(deserializer)?;
-    let mut table = [[0_u64; 256]; 4];
-    assert_eq!(table_data.len(), 4);
+    let mut table = [[0_u64; 256]; 8];
+    assert_eq!(table_data.len(), 8);
     for (i, column) in table_data.iter().enumerate() {
         assert_eq!(column.len(), 256);
         for (j, value) in column.iter().enumerate() {

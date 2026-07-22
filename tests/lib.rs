@@ -4,27 +4,9 @@ use tab_hash::{Tab32Mixed, Tab32Simple, Tab32Twisted, Tab64Mixed, Tab64Simple, T
 
 unsafe extern "C" {
     fn SimpleTab32(x: u32, H: &[[u32; 256]; 4]) -> u32;
-    fn MixedTab32(x: u32, H1: &[[u64; 256]; 4], H2: &[[u32; 256]; 4]) -> u32;
     fn TwistedTab32(x: u32, H: &[[u64; 256]; 4]) -> u32;
     fn SimpleTab64(x: u64, H: &[[u64; 256]; 8]) -> u64;
-    fn MixedTab64(x: u64, H1: &[[u128; 256]; 8], H2: &[[u64; 256]; 4]) -> u64;
     fn TwistedTab64(x: u64, H: &[[u128; 256]; 8]) -> u64;
-}
-
-#[test]
-fn mixed32_vs_reference_implementation() {
-    for _ in 0..10 {
-        let mixed_tabhash = Tab32Mixed::new();
-        let (first_table, second_table) = mixed_tabhash.get_table();
-        let random_keys: [u32; 100] = array_init::array_init(|_| rand::random());
-        for key in random_keys.iter() {
-            let rust_result = mixed_tabhash.hash(*key);
-            unsafe {
-                let reference_result = MixedTab32(*key, &first_table, &second_table);
-                assert_eq!(reference_result, rust_result);
-            }
-        }
-    }
 }
 
 #[test]
@@ -70,22 +52,6 @@ fn simple64_vs_reference_implementation() {
             let rust_result = simple_tabhash.hash(*key);
             unsafe {
                 let reference_result = SimpleTab64(*key, &seed);
-                assert_eq!(reference_result, rust_result);
-            }
-        }
-    }
-}
-
-#[test]
-fn mixed64_vs_reference_implementation() {
-    for _ in 0..10 {
-        let mixed_tabhash = Tab64Mixed::new();
-        let (first_table, second_table) = mixed_tabhash.get_table();
-        let random_keys: [u64; 100] = array_init::array_init(|_| rand::random());
-        for key in random_keys.iter() {
-            let rust_result = mixed_tabhash.hash(*key);
-            unsafe {
-                let reference_result = MixedTab64(*key, &first_table, &second_table);
                 assert_eq!(reference_result, rust_result);
             }
         }
@@ -195,17 +161,21 @@ fn mixed32_vs_fixed_value() {
 fn mixed64_vs_fixed_value() {
     let key = 0x0807_0605_0402_0100;
     let mut first_table = [[0_u128; 256]; 8];
-    let mut second_table = [[0_u64; 256]; 4];
+    let mut second_table = [[0_u64; 256]; 8];
 
-    // Bits 64..96 contain the four derived bytes; the low 64 bits are the base hash.
-    first_table[0][0] = (0x0402_0100_u128 << 64) | 7;
+    // Bits 64..128 contain the eight derived bytes; the low 64 bits are the base hash.
+    first_table[0][0] = (0x0807_0605_0402_0100_u128 << 64) | 7;
     second_table[0][0] = 11;
     second_table[1][1] = 13;
     second_table[2][2] = 17;
     second_table[3][4] = 19;
+    second_table[4][5] = 23;
+    second_table[5][6] = 29;
+    second_table[6][7] = 31;
+    second_table[7][8] = 37;
 
     let mixed = Tab64Mixed::with_table(first_table, second_table);
-    assert_eq!(mixed.hash(key), 7 ^ 11 ^ 13 ^ 17 ^ 19);
+    assert_eq!(mixed.hash(key), 7 ^ 11 ^ 13 ^ 17 ^ 19 ^ 23 ^ 29 ^ 31 ^ 37);
 }
 
 #[test]

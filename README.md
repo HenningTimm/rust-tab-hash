@@ -81,7 +81,14 @@ since they do not work on arbitrary length byte streams.
 
 The 64-bit version of twisted tabulation hashing (`Tab64Twisted`) requires 128-bit operations (see [here](https://doi.org/10.1137/1.9781611973105.16)).
 
-Mixed tabulation uses four 8-bit derived characters. `Tab32Mixed` performs 4 + 4 table lookups, while `Tab64Mixed` performs 8 + 4 table lookups.
+Mixed tabulation first derives additional 8-bit characters and then hashes the
+original and derived characters together. In the notation from the mixed
+tabulation papers, `c` is the number of input characters and `d` is the number
+of derived characters. The theory allows any fixed `d >= 1`; larger `d` reduces
+the failure-probability terms in the analysis, at the cost of `d` extra table
+lookups and `d` extra tables. This crate follows the common implementation
+choice `d = c`: `Tab32Mixed` performs 4 + 4 table lookups, while `Tab64Mixed`
+performs 8 + 8 table lookups.
 
 ## Literature:
 This implementation is based on the articles of Mihai Pătraşcu and Mikkel Thorup:

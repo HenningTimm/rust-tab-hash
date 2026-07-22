@@ -1,6 +1,6 @@
 [package]
 name = "tab-hash"
-version = "0.3.1"
+version = "0.4.0"
 authors = ["Henning Timm <henning.timm@tu-dortmund.de>", "Jianshu Zhao <jianshuzhao@yahoo.com>"]
 description = "Simple, twisted, and mixed tabulation hashing for 32-bit and 64-bit unsigned integers."
 homepage = "https://github.com/HenningTimm/rust-tab-hash"
