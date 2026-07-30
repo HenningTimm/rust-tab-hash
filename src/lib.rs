@@ -1,6 +1,7 @@
-//! This crate offers rust implementations of simple and twisted tabulation hashing for 32-bit integer values.
+//! This crate offers Rust implementations of simple, twisted, and mixed tabulation hashing
+//! for 32-bit and 64-bit integer values.
 //!
-//! Instatiating `Tab32Simple` or `Tab32Twisted` will initialize a table and
+//! Instantiating `Tab32Simple`, `Tab32Twisted`, or `Tab32Mixed` will initialize tables and
 //! create a random hash function from the respective hash family.
 //! The hash value of a 32-bit integer can be computed by calling its `hash` method.
 //!
@@ -38,6 +39,8 @@
 //! This implementation is based on the articles of Mihai Patrascu and Mikkel Thorup:
 //! - [Simple Tabulation Hashing](http://dx.doi.org/10.1145/1993636.1993638)
 //! - [Twisted Tabulation Hashing](https://doi.org/10.1137/1.9781611973105.16)
+//! - [Hashing for Statistics over k-Partitions](https://doi.org/10.1109/FOCS.2015.83)
+//! - [Fast and Powerful Hashing Using Tabulation](https://arxiv.org/abs/1505.01523)
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 /// Split up a 32bit number into 8bit chunks
@@ -281,6 +284,319 @@ impl Serialize for Tab64Simple {
     {
         _VecTab64Simple {
             table: self.to_vec(),
+        }
+        .serialize(s)
+    }
+}
+
+/// A hash function for 32-bit integers using mixed tabulation.
+///
+/// Mixed tabulation first hashes the four input bytes into a 32-bit intermediate
+/// hash value and four derived bytes. The derived bytes are then hashed by a
+/// second simple tabulation function and XORed into the intermediate value.
+/// This implementation uses `c = d = 4`, where `c` is the number of input
+/// characters and `d` is the number of derived characters.
+///
+/// Usage:
+/// ```rust
+/// use tab_hash::Tab32Mixed;
+///
+/// let keys = vec![0, 8, 15, 47, 11];
+/// let mixed = Tab32Mixed::new();
+/// for k in keys {
+///     println!("{}", mixed.hash(k));
+/// }
+/// ```
+#[derive(Clone, Deserialize)]
+pub struct Tab32Mixed {
+    #[serde(deserialize_with = "tab32mixed_first_from_vec")]
+    first_table: [[u64; 256]; 4],
+    #[serde(deserialize_with = "tab32mixed_second_from_vec")]
+    second_table: [[u32; 256]; 4],
+}
+
+impl Tab32Mixed {
+    /// Create a new mixed tabulation hash function with random tables.
+    pub fn new() -> Self {
+        Tab32Mixed {
+            first_table: array_init::array_init(|_| array_init::array_init(|_| rand::random())),
+            second_table: array_init::array_init(|_| array_init::array_init(|_| rand::random())),
+        }
+    }
+
+    /// Convert the two tables to nested vectors.
+    pub fn to_vec(&self) -> (Vec<Vec<u64>>, Vec<Vec<u32>>) {
+        let first_table = self
+            .first_table
+            .iter()
+            .map(|column| column.to_vec())
+            .collect();
+        let second_table = self
+            .second_table
+            .iter()
+            .map(|column| column.to_vec())
+            .collect();
+        (first_table, second_table)
+    }
+
+    /// Create a mixed tabulation hash function from nested-vector table data.
+    pub fn from_vec(first_table_data: Vec<Vec<u64>>, second_table_data: Vec<Vec<u32>>) -> Self {
+        let mut first_table = [[0_u64; 256]; 4];
+        assert_eq!(first_table_data.len(), 4);
+        for (i, column) in first_table_data.iter().enumerate() {
+            assert_eq!(column.len(), 256);
+            for (j, value) in column.iter().enumerate() {
+                first_table[i][j] = *value;
+            }
+        }
+
+        let mut second_table = [[0_u32; 256]; 4];
+        assert_eq!(second_table_data.len(), 4);
+        for (i, column) in second_table_data.iter().enumerate() {
+            assert_eq!(column.len(), 256);
+            for (j, value) in column.iter().enumerate() {
+                second_table[i][j] = *value;
+            }
+        }
+
+        Tab32Mixed {
+            first_table,
+            second_table,
+        }
+    }
+
+    /// Create a mixed tabulation hash function with the given tables.
+    pub fn with_table(first_table: [[u64; 256]; 4], second_table: [[u32; 256]; 4]) -> Self {
+        Tab32Mixed {
+            first_table,
+            second_table,
+        }
+    }
+
+    /// Get the tables used by this hash function.
+    pub fn get_table(&self) -> ([[u64; 256]; 4], [[u32; 256]; 4]) {
+        (self.first_table, self.second_table)
+    }
+
+    /// Compute a mixed tabulation hash value for a 32-bit integer.
+    pub fn hash(&self, x: u32) -> u32 {
+        let mut first_hash = 0_u64;
+        for (i, c) in byte_chunks_32(x).iter().enumerate() {
+            first_hash ^= self.first_table[i][*c as usize];
+        }
+
+        let derived = byte_chunks_32((first_hash >> 32) as u32);
+        let mut hash = first_hash as u32;
+        for (i, c) in derived.iter().enumerate() {
+            hash ^= self.second_table[i][*c as usize];
+        }
+        hash
+    }
+}
+
+fn tab32mixed_first_from_vec<'de, D>(deserializer: D) -> Result<[[u64; 256]; 4], D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let table_data: Vec<Vec<u64>> = Deserialize::deserialize(deserializer)?;
+    let mut table = [[0_u64; 256]; 4];
+    assert_eq!(table_data.len(), 4);
+    for (i, column) in table_data.iter().enumerate() {
+        assert_eq!(column.len(), 256);
+        for (j, value) in column.iter().enumerate() {
+            table[i][j] = *value;
+        }
+    }
+    Ok(table)
+}
+
+fn tab32mixed_second_from_vec<'de, D>(deserializer: D) -> Result<[[u32; 256]; 4], D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let table_data: Vec<Vec<u32>> = Deserialize::deserialize(deserializer)?;
+    let mut table = [[0_u32; 256]; 4];
+    assert_eq!(table_data.len(), 4);
+    for (i, column) in table_data.iter().enumerate() {
+        assert_eq!(column.len(), 256);
+        for (j, value) in column.iter().enumerate() {
+            table[i][j] = *value;
+        }
+    }
+    Ok(table)
+}
+
+#[derive(Serialize)]
+struct _VecTab32Mixed {
+    first_table: Vec<Vec<u64>>,
+    second_table: Vec<Vec<u32>>,
+}
+
+impl Serialize for Tab32Mixed {
+    fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let (first_table, second_table) = self.to_vec();
+        _VecTab32Mixed {
+            first_table,
+            second_table,
+        }
+        .serialize(s)
+    }
+}
+
+/// A hash function for 64-bit integers using mixed tabulation.
+/// see paper:Dahlgaard, S., Knudsen, M. and Thorup, M., 2017. Practical hash functions for similarity estimation and dimensionality reduction. Advances in neural information processing systems, 30.
+/// The first stage uses eight input-byte lookups to produce a 64-bit intermediate
+/// hash value and eight derived bytes. Eight more lookups hash the derived bytes.
+/// This implementation uses `c = d = 8`, where `c` is the number of input
+/// characters and `d` is the number of derived characters.
+///
+/// Usage:
+/// ```rust
+/// use tab_hash::Tab64Mixed;
+///
+/// let keys = vec![0, 8, 15, 47, 11];
+/// let mixed = Tab64Mixed::new();
+/// for k in keys {
+///     println!("{}", mixed.hash(k));
+/// }
+/// ```
+#[derive(Clone, Deserialize)]
+pub struct Tab64Mixed {
+    #[serde(deserialize_with = "tab64mixed_first_from_vec")]
+    first_table: [[u128; 256]; 8],
+    #[serde(deserialize_with = "tab64mixed_second_from_vec")]
+    second_table: [[u64; 256]; 8],
+}
+
+impl Tab64Mixed {
+    /// Create a new mixed tabulation hash function with random tables.
+    pub fn new() -> Self {
+        Tab64Mixed {
+            first_table: array_init::array_init(|_| array_init::array_init(|_| rand::random())),
+            second_table: array_init::array_init(|_| array_init::array_init(|_| rand::random())),
+        }
+    }
+
+    /// Convert the two tables to nested vectors.
+    pub fn to_vec(&self) -> (Vec<Vec<u128>>, Vec<Vec<u64>>) {
+        let first_table = self
+            .first_table
+            .iter()
+            .map(|column| column.to_vec())
+            .collect();
+        let second_table = self
+            .second_table
+            .iter()
+            .map(|column| column.to_vec())
+            .collect();
+        (first_table, second_table)
+    }
+
+    /// Create a mixed tabulation hash function from nested-vector table data.
+    pub fn from_vec(first_table_data: Vec<Vec<u128>>, second_table_data: Vec<Vec<u64>>) -> Self {
+        let mut first_table = [[0_u128; 256]; 8];
+        assert_eq!(first_table_data.len(), 8);
+        for (i, column) in first_table_data.iter().enumerate() {
+            assert_eq!(column.len(), 256);
+            for (j, value) in column.iter().enumerate() {
+                first_table[i][j] = *value;
+            }
+        }
+
+        let mut second_table = [[0_u64; 256]; 8];
+        assert_eq!(second_table_data.len(), 8);
+        for (i, column) in second_table_data.iter().enumerate() {
+            assert_eq!(column.len(), 256);
+            for (j, value) in column.iter().enumerate() {
+                second_table[i][j] = *value;
+            }
+        }
+
+        Tab64Mixed {
+            first_table,
+            second_table,
+        }
+    }
+
+    /// Create a mixed tabulation hash function with the given tables.
+    pub fn with_table(first_table: [[u128; 256]; 8], second_table: [[u64; 256]; 8]) -> Self {
+        Tab64Mixed {
+            first_table,
+            second_table,
+        }
+    }
+
+    /// Get the tables used by this hash function.
+    pub fn get_table(&self) -> ([[u128; 256]; 8], [[u64; 256]; 8]) {
+        (self.first_table, self.second_table)
+    }
+
+    /// Compute a mixed tabulation hash value for a 64-bit integer.
+    pub fn hash(&self, x: u64) -> u64 {
+        let mut first_hash = 0_u128;
+        for (i, c) in byte_chunks_64(x).iter().enumerate() {
+            first_hash ^= self.first_table[i][*c as usize];
+        }
+
+        let derived = byte_chunks_64((first_hash >> 64) as u64);
+        let mut hash = first_hash as u64;
+        for (i, c) in derived.iter().enumerate() {
+            hash ^= self.second_table[i][*c as usize];
+        }
+        hash
+    }
+}
+
+fn tab64mixed_first_from_vec<'de, D>(deserializer: D) -> Result<[[u128; 256]; 8], D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let table_data: Vec<Vec<u128>> = Deserialize::deserialize(deserializer)?;
+    let mut table = [[0_u128; 256]; 8];
+    assert_eq!(table_data.len(), 8);
+    for (i, column) in table_data.iter().enumerate() {
+        assert_eq!(column.len(), 256);
+        for (j, value) in column.iter().enumerate() {
+            table[i][j] = *value;
+        }
+    }
+    Ok(table)
+}
+
+fn tab64mixed_second_from_vec<'de, D>(deserializer: D) -> Result<[[u64; 256]; 8], D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let table_data: Vec<Vec<u64>> = Deserialize::deserialize(deserializer)?;
+    let mut table = [[0_u64; 256]; 8];
+    assert_eq!(table_data.len(), 8);
+    for (i, column) in table_data.iter().enumerate() {
+        assert_eq!(column.len(), 256);
+        for (j, value) in column.iter().enumerate() {
+            table[i][j] = *value;
+        }
+    }
+    Ok(table)
+}
+
+#[derive(Serialize)]
+struct _VecTab64Mixed {
+    first_table: Vec<Vec<u128>>,
+    second_table: Vec<Vec<u64>>,
+}
+
+impl Serialize for Tab64Mixed {
+    fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let (first_table, second_table) = self.to_vec();
+        _VecTab64Mixed {
+            first_table,
+            second_table,
         }
         .serialize(s)
     }

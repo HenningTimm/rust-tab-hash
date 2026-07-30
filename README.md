@@ -6,13 +6,13 @@
 
 # tab-hash - Tabulation Hashing for Rust
 
-This crate offers rust implementations of simple and twisted tabulation hashing for 32-bit und 64-bit integer values.
+This crate offers Rust implementations of simple, twisted, and mixed tabulation hashing for 32-bit and 64-bit integer values.
 
-Instatiating `Tab32Simple` or `Tab32Twisted` (or their 64-bit counterparts) will initialize a table and
+Instantiating `Tab32Simple`, `Tab32Twisted`, or `Tab32Mixed` (or their 64-bit counterparts) will initialize tables and
 create a random hash function from the respective hash family.
-The hash values of an integer key is computed by calling its `hash` method.
+The hash value of an integer key is computed by calling its `hash` method.
 
-## Example:
+## Simple tabulation example
 
 ```rust
 use tab_hash::Tab32Simple;
@@ -23,6 +23,23 @@ fn main() {
     for k in keys {
         println!("{}", simple.hash(k));
     }
+}
+```
+
+## Mixed tabulation example
+
+`Tab32Mixed` and `Tab64Mixed` use the same `new` and `hash` interface as the
+simple and twisted variants:
+
+```rust
+use tab_hash::{Tab32Mixed, Tab64Mixed};
+
+fn main() {
+    let mixed32 = Tab32Mixed::new();
+    let mixed64 = Tab64Mixed::new();
+
+    println!("32-bit hash: {}", mixed32.hash(42_u32));
+    println!("64-bit hash: {}", mixed64.hash(42_u64));
 }
 ```
 
@@ -42,19 +59,50 @@ fn main() {
 }
 ```
 
+Mixed tabulation has two tables. Pass both values returned by `get_table` to
+`with_table` to recreate the same hash function:
+
+```rust
+use tab_hash::Tab64Mixed;
+
+fn main() {
+    let key = 42;
+    let mixed_1 = Tab64Mixed::new();
+    let (first_table, second_table) = mixed_1.get_table();
+    let mixed_2 = Tab64Mixed::with_table(first_table, second_table);
+
+    assert_eq!(mixed_1.hash(key), mixed_2.hash(key));
+}
+```
+
 ## Note:
 These hash functions do not implement the `std::hash::Hasher` trait,
 since they do not work on arbitrary length byte streams.
 
 The 64-bit version of twisted tabulation hashing (`Tab64Twisted`) requires 128-bit operations (see [here](https://doi.org/10.1137/1.9781611973105.16)).
 
+Mixed tabulation first derives additional 8-bit characters and then hashes the
+original and derived characters together. In the notation from the mixed
+tabulation papers, `c` is the number of input characters and `d` is the number
+of derived characters. The theory allows any fixed `d >= 1`; larger `d` reduces
+the failure-probability terms in the analysis, at the cost of `d` extra table
+lookups and `d` extra tables. This crate follows the common implementation
+choice `d = c`: `Tab32Mixed` performs 4 + 4 table lookups, while `Tab64Mixed`
+performs 8 + 8 table lookups.
+
 ## Literature:
 This implementation is based on the articles of Mihai Pătraşcu and Mikkel Thorup:
 - [Simple Tabulation Hashing](http://dx.doi.org/10.1145/1993636.1993638)
 - [Twisted Tabulation Hashing](https://doi.org/10.1137/1.9781611973105.16)
+- [Hashing for Statistics over k-Partitions](https://doi.org/10.1109/FOCS.2015.83)
+- [Fast and Powerful Hashing Using Tabulation](https://arxiv.org/abs/1505.01523)
 
 
 ## Changelog
+
+### Version 0.3.1 [2026-06-23]
+
+Add mixed tabulation hashing.
 
 ### Version 0.3.0 [2020-02-12]
 

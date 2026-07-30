@@ -1,8 +1,8 @@
 use array_init;
 use rand;
-use tab_hash::{Tab32Simple, Tab32Twisted, Tab64Simple, Tab64Twisted};
+use tab_hash::{Tab32Mixed, Tab32Simple, Tab32Twisted, Tab64Mixed, Tab64Simple, Tab64Twisted};
 
-extern "C" {
+unsafe extern "C" {
     fn SimpleTab32(x: u32, H: &[[u32; 256]; 4]) -> u32;
     fn TwistedTab32(x: u32, H: &[[u64; 256]; 4]) -> u32;
     fn SimpleTab64(x: u64, H: &[[u64; 256]; 8]) -> u64;
@@ -141,6 +141,44 @@ fn twisted_vs_fixed_value() {
 }
 
 #[test]
+fn mixed32_vs_fixed_value() {
+    let key = 0x0402_0100;
+    let mut first_table = [[0_u64; 256]; 4];
+    let mut second_table = [[0_u32; 256]; 4];
+
+    // The first stage yields derived bytes [0, 1, 2, 4] and base hash 7.
+    first_table[0][0] = (0x0402_0100_u64 << 32) | 7;
+    second_table[0][0] = 11;
+    second_table[1][1] = 13;
+    second_table[2][2] = 17;
+    second_table[3][4] = 19;
+
+    let mixed = Tab32Mixed::with_table(first_table, second_table);
+    assert_eq!(mixed.hash(key), 7 ^ 11 ^ 13 ^ 17 ^ 19);
+}
+
+#[test]
+fn mixed64_vs_fixed_value() {
+    let key = 0x0807_0605_0402_0100;
+    let mut first_table = [[0_u128; 256]; 8];
+    let mut second_table = [[0_u64; 256]; 8];
+
+    // Bits 64..128 contain the eight derived bytes; the low 64 bits are the base hash.
+    first_table[0][0] = (0x0807_0605_0402_0100_u128 << 64) | 7;
+    second_table[0][0] = 11;
+    second_table[1][1] = 13;
+    second_table[2][2] = 17;
+    second_table[3][4] = 19;
+    second_table[4][5] = 23;
+    second_table[5][6] = 29;
+    second_table[6][7] = 31;
+    second_table[7][8] = 37;
+
+    let mixed = Tab64Mixed::with_table(first_table, second_table);
+    assert_eq!(mixed.hash(key), 7 ^ 11 ^ 13 ^ 17 ^ 19 ^ 23 ^ 29 ^ 31 ^ 37);
+}
+
+#[test]
 fn simple32_to_and_from_vec() {
     for _ in 0..1000 {
         let h = Tab32Simple::new();
@@ -221,6 +259,32 @@ fn twisted64_to_and_from_vec() {
 }
 
 #[test]
+fn mixed32_to_and_from_vec() {
+    for _ in 0..10 {
+        let h = Tab32Mixed::new();
+        let (first_table, second_table) = h.to_vec();
+        let h2 = Tab32Mixed::from_vec(first_table, second_table);
+        let random_keys: [u32; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            assert_eq!(h.hash(*key), h2.hash(*key));
+        }
+    }
+}
+
+#[test]
+fn mixed64_to_and_from_vec() {
+    for _ in 0..10 {
+        let h = Tab64Mixed::new();
+        let (first_table, second_table) = h.to_vec();
+        let h2 = Tab64Mixed::from_vec(first_table, second_table);
+        let random_keys: [u64; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            assert_eq!(h.hash(*key), h2.hash(*key));
+        }
+    }
+}
+
+#[test]
 fn simple32_serialization() {
     for _ in 0..1000 {
         let hf = Tab32Simple::new();
@@ -293,6 +357,32 @@ fn twisted64_serialization() {
             assert_eq!(t1[column].to_vec(), t2[column].to_vec());
         }
 
+        let random_keys: [u64; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            assert_eq!(hf.hash(*key), deserialized_hf.hash(*key));
+        }
+    }
+}
+
+#[test]
+fn mixed32_serialization() {
+    for _ in 0..10 {
+        let hf = Tab32Mixed::new();
+        let serialized_hf = bincode::serialize(&hf).unwrap();
+        let deserialized_hf: Tab32Mixed = bincode::deserialize(&serialized_hf).unwrap();
+        let random_keys: [u32; 100] = array_init::array_init(|_| rand::random());
+        for key in random_keys.iter() {
+            assert_eq!(hf.hash(*key), deserialized_hf.hash(*key));
+        }
+    }
+}
+
+#[test]
+fn mixed64_serialization() {
+    for _ in 0..10 {
+        let hf = Tab64Mixed::new();
+        let serialized_hf = bincode::serialize(&hf).unwrap();
+        let deserialized_hf: Tab64Mixed = bincode::deserialize(&serialized_hf).unwrap();
         let random_keys: [u64; 100] = array_init::array_init(|_| rand::random());
         for key in random_keys.iter() {
             assert_eq!(hf.hash(*key), deserialized_hf.hash(*key));
