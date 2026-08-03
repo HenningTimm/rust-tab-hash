@@ -91,16 +91,16 @@ choice `d = c`: `Tab32Mixed` performs 4 + 4 table lookups, while `Tab64Mixed`
 performs 8 + 8 table lookups.
 
 ## Literature:
-This implementation is based on the articles of Mihai Pătraşcu and Mikkel Thorup:
+This implementation is based on the articles of Mihai Pătraşcu, Mikkel Thorup, Søren Dahlgaard, et al.:
 - [Simple Tabulation Hashing](http://dx.doi.org/10.1145/1993636.1993638)
 - [Twisted Tabulation Hashing](https://doi.org/10.1137/1.9781611973105.16)
-- [Hashing for Statistics over k-Partitions](https://doi.org/10.1109/FOCS.2015.83)
+- [Hashing for Statistics over k-Partitions (Mixed Tabulation)](https://doi.org/10.1109/FOCS.2015.83)
 - [Fast and Powerful Hashing Using Tabulation](https://arxiv.org/abs/1505.01523)
 
 
 ## Changelog
 
-### Version 0.3.1 [2026-06-23]
+### Version 0.4.0 [2026-08-03]
 
 Add mixed tabulation hashing.
 
