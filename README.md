@@ -102,7 +102,9 @@ This implementation is based on the articles of Mihai Pătraşcu, Mikkel Thorup,
 
 ### Version 0.4.0 [2026-08-03]
 
-Add mixed tabulation hashing.
+- Add mixed tabulation hashing. Thanks @jianshu93
+- Updated edition
+- Updated dependencies
 
 ### Version 0.3.0 [2020-02-12]
 
